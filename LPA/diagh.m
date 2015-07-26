@@ -1,10 +1,7 @@
-function [ d ] = diagh( vert1,vert2,Nr,Nc )
+function [ d ] = diagh( s1,s2,p,q )
 
-[vr,vc] = ind2sub([Nr, Nc], vert1);
-[gr,gc] = ind2sub([Nr, Nc], vert2);
-
-dx = abs( vc - gc );
-dy = abs (vr - gr );
+dx = p*abs( s1(2) - s2(2) );
+dy = q*abs( s1(1) - s2(1) );
 
 D2 = 1;
 D = 1;

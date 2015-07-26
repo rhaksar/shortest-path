@@ -50,13 +50,17 @@ classdef Dgrid < handle
         end
         
         % find the shortest path
-        function ComputeShortestPath(dstar)
-            findpath(dstar);
+        function cnt = ComputeShortestPath(dstar)
+            cnt = findpath(dstar);
         end
         
         % navigate the grid
         function NavigateGrid(dstar,dflag)
             movepath(dstar,dflag);
+        end
+        
+        function ShowPath(dstar)
+            showPath(dstar.path,dstar.A);
         end
         
         % update a vertex
@@ -73,8 +77,11 @@ function key = CalcKey(s,dstar)
 
     g_val = getVecVal(s,dstar.g);
     rhs_val = getVecVal(s,dstar.rhs);
+    
+    [start_r,start_c] = ind2sub(size(dstar.A),dstar.start);
+    [sr,sc] = ind2sub(size(dstar.A),s);
 
-    key1 = min([g_val, rhs_val]) + dstar.heur(dstar.start,s) + dstar.km;
+    key1 = min([g_val, rhs_val]) + dstar.heur([start_r,start_c],[sr,sc]) + dstar.km;
     key2 = min([g_val, rhs_val]);
 
     key = [key1, key2];
@@ -130,7 +137,7 @@ function update(dstar,s)
 
 end
 
-function findpath(dstar)
+function cnt = findpath(dstar)
     UTopKey = dstar.U.TopKey();
     startKey = CalcKey(dstar.start,dstar);
     keyflag = 0;
@@ -193,12 +200,16 @@ end
 
 function movepath(dstar,dflag)
     dstar.last = dstar.start;
-    dstar.ComputeShortestPath();
+    total = 0;
+    cnt = dstar.ComputeShortestPath();
+    total = total + cnt;
     
     dstar.path = {dstar.start};
     if dflag
-        [r,c] = ind2sub([dstar.Nr,dstar.Nc],dstar.start);
-        showPath({[c,dstar.Nr-r+1]},fliplr(dstar.A'));
+        showPath({},dstar.A);
+        [x(1),x(2)] = ind2sub(size(dstar.A),dstar.start);
+        changeColor(x,'r');
+        
     end
     
     while dstar.start ~= dstar.goal
@@ -225,13 +236,15 @@ function movepath(dstar,dflag)
         dstar.path{end+1} = dstar.start;
         
         if dflag
-            [r,c] = ind2sub([dstar.Nr,dstar.Nc],dstar.start);
-            showPath({[c,dstar.Nr-r+1]},fliplr(dstar.A'));
+            [x(1),x(2)] = ind2sub(size(dstar.A),dstar.start);
+            changeColor(x,'r');
         end
             
         vs = dstar.obs(dstar.start,dstar.A);
         if ~isempty(vs)
-            dstar.km = dstar.km + dstar.heur(dstar.last,dstar.start);
+            [last_r,last_c] = ind2sub(size(dstar.A),dstar.last);
+            [start_r,start_c] = ind2sub(size(dstar.A),dstar.start);
+            dstar.km = dstar.km + dstar.heur([last_r,last_c],[start_r,start_c]);
             dstar.last = dstar.start;
             for k = 1:length(vs)
                 [r,c] = ind2sub([dstar.Nr,dstar.Nc],vs(k));
@@ -244,7 +257,8 @@ function movepath(dstar,dflag)
             for k = q_vert
                 dstar.U.Update(k,CalcKey(k,dstar));
             end
-            dstar.ComputeShortestPath();
+            cnt = dstar.ComputeShortestPath();
+            total = total + cnt;
         end
     end
     
@@ -252,7 +266,7 @@ function movepath(dstar,dflag)
         [r,c] = ind2sub([dstar.Nr,dstar.Nc],dstar.path{k});
         dstar.path{k} = [r,c];
     end
-    
+    fprintf('Total set extractions: %d\n',total);
     fprintf('Created final path.\n');
     
 
@@ -263,18 +277,17 @@ initializeGraphics(A);
 global handles;
 for i=1:size(path,2)
     changeColor(path{i},'r');
-%     fprintf('Press any key to continue navigating...\n');
-    pause(0.25);
+    pause(0.03);    
 end
 end
 
 function initializeGraphics(A)
-figure(1);
+figure;
 N=size(A,1);
 M=size(A,2);
 global handles
-handles = cell(N,M);
-axis([-0.2,N+0.2,-0.2,M+0.2]);
+handles =cell(N,M);
+axis([-0.2,M+0.2,-0.2,N+0.2]);
 hold on
 daspect([1,1,1]);
 for i=1:N
@@ -303,4 +316,5 @@ function changeColor(x,col)
     delete(handles{x(1),x(2)});
     handles{x(1),x(2)}=rectangle('Position',...
                      [x(1)-1,x(2)-1,1,1],'LineWidth',1,'FaceColor',col);
+                 drawnow;
 end

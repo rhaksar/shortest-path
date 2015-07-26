@@ -9,13 +9,13 @@ classdef LPAgrid < handle
         U
         path
         A
+        start
     end
     properties (Access = private)
         succ
         pred
         heur
         cost
-        start
         goal
         path_plot
         Nr
@@ -85,7 +85,7 @@ classdef LPAgrid < handle
         
         % show path
         function ShowPath(lpa)
-            showPath(lpa.path_plot,fliplr(lpa.A'));
+            showPath(lpa.path,lpa.A);
         end
         
         % show grid only
@@ -103,7 +103,10 @@ function key = CalcKey(s,lpa)
     g_val = getVecVal(s,lpa.g);
     rhs_val = getVecVal(s,lpa.rhs);
 
-    key1 = min([g_val, rhs_val]) + lpa.heur(s,lpa.goal);
+    [sr,sc] = ind2sub(size(lpa.A),s);
+    [gr,gc] = ind2sub(size(lpa.A),lpa.goal);
+
+    key1 = min([g_val, rhs_val]) + lpa.heur([sr,sc],[gr,gc]);
     key2 = min([g_val, rhs_val]);
 
     key = [key1, key2];
@@ -246,7 +249,7 @@ N=size(A,1);
 M=size(A,2);
 global handles
 handles =cell(N,M);
-% axis([-0.2,M+0.2,-0.2,N+0.2]);
+axis([-0.2,N+0.2,-0.2,M+0.2]);
 hold on
 daspect([1,1,1]);
 for i=1:N

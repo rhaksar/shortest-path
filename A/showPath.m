@@ -13,7 +13,7 @@ N=size(A,1);
 M=size(A,2);
 global handles
 handles =cell(N,M);
-% axis([-0.2,M+0.2,-0.2,N+0.2]);
+axis([-0.2,N+0.2,-0.2,M+0.2]);
 hold on
 daspect([1,1,1]);
 for i=1:N

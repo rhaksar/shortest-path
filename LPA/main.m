@@ -1,44 +1,32 @@
+%% LPA* 
 clear; clc; close all;
 
-% [start,goal,A] = CreateMaze();
-% [Nr,Nc] = size(A);
-
-load('maze_data.mat');
+[start,goal,A,p,q] = CreateMaze(1);
 [Nr,Nc] = size(A);
-start = sub2ind(size(A),s(1),s(2));
-goal = sub2ind(size(A),t(1),t(2));
 
-heur = @(x,y) manh(x,y,Nr,Nc,p,q);
-% heur = @(x,y) diagh(x,y,Nr,Nc);
+heur = @(x,y) manh(x,y,p,q);
+% heur = @(x,y) diagh(x,y,p,q);
 succ = @(x,A) maze4_neighbors(x,A);
 pred = @(x,A) maze4_neighbors(x,A);
 cost = @(x,y,A) maze4_cost(x,y,A,p,q);
 
 lpa_obj = LPAgrid(A,start,goal,succ,pred,heur,cost);
+lpa_obj.ComputeShortestPath();
+lpa_obj.CreatePath();
+lpa_obj.ShowPath();
+keyboard
 
-run = 1;
-while run
-    lpa_obj.ComputeShortestPath();
-    lpa_obj.CreatePath();
-    showPath(lpa_obj.path,A);
-    %lpa_obj.ShowPath();
-    
-    while true
-        x = input('''1'' to change the maze, ''2'' to exit: ');
-        if x == 1
-            %[vertices,lpa_obj.A] = ChangeMaze();
-            lpa_obj.A(55,36) = 0;
-            idx = sub2ind([Nr,Nc],55,36);
-            vertices = [idx succ(idx,lpa_obj.A)];
-            for k = vertices
-                lpa_obj.UpdateVertex(k);
-            end
-            break;
-        elseif x == 2
-            fprintf('Done!\n');
-            run = 0;
-            break;
-        end
-    end
-
+vs = find(lpa_obj.A == 2);
+upd_vs = [];
+for k = 1:length(vs)
+    [r,c] = ind2sub(size(lpa_obj.A),vs(k));
+    lpa_obj.A(r,c) = 0; 
+    upd_vs = [upd_vs vs(k) succ(vs(k),lpa_obj.A)];
 end
+for k = upd_vs
+    lpa_obj.UpdateVertex(k);
+end
+
+lpa_obj.ComputeShortestPath();
+lpa_obj.CreatePath();
+lpa_obj.ShowPath();

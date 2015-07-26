@@ -1,14 +1,14 @@
-function [ start,goal,A ] = CreateMaze()
+function [ start,goal,A,p,q ] = CreateMaze(maze_choice)
 
-% start = 2;
-% goal = 15;
-% A = [1 1 1;
-%      1 0 1;
-%      1 0 1;
-%      1 2 1;
-%      1 1 1];
-
-A =  [-1	-1	0	0	-1	0	0	0	0	0	-1	-1	-1	0	0	-1	0	-1	-1	-1
+if maze_choice == 1
+    load('maze_data.mat');
+    start = sub2ind(size(A),s(1),s(2));
+    goal = sub2ind(size(A),t(1),t(2));
+    A(55,36) = 2;
+    return;
+    
+elseif maze_choice == 2
+    A =  [-1	-1	0	0	-1	0	0	0	0	0	-1	-1	-1	0	0	-1	0	-1	-1	-1
         0	0	-1	0	-1	-1	-1	0	0	-1	0	0	-1	-1	0	-1	0	0	0	0
         -1	0	0	0	-1	0	-1	-1	0	0	0	0	0	-1	0	0	-1	-1	-1	0
         0	0	0	0	-1	0	-1	-1	0	0	0	0	-1	-1	0	-1	-1	0	0	-1
@@ -24,15 +24,27 @@ A =  [-1	-1	0	0	-1	0	0	0	0	0	-1	-1	-1	0	0	-1	0	-1	-1	-1
         0	0	0	0	-1	-1	0	-1	0	-1	0	0	0	0	0	-1	0	0	-1	0
         -1	0	0	-1	0	-1	0	-1	-1	0	0	0	0	-1	-1	0	-1	0	-1	0];
     
-A(A == 0) = 1; % One means free
-A(A == -1) = 0; % Zero means wall
+    A(A == 0) = 1;
+    A(A == -1) = 0;
+    
+    A(8,13) = 2;
+    A(9,14) = 2;
+    A(7,1) = 2;
+%     A(9,19) = 2;
+    p = 1;
+    q = 1;
+    
+    start = 53;
+    goal = 248;
+    return;
 
-A(8,13) = 2; % Two means unkown obstacle
-A(9,14) = 2;
-A(7,1) = 2;
-A(9,19) = 2;
-start = 53;
-goal = 248;
+else
+    fprintf('Bad maze choice\n');
+    A = [];
+    start = -1;
+    goal = -1; 
+    return;
+end
 
 
 end
