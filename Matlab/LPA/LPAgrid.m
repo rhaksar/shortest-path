@@ -10,6 +10,7 @@ classdef LPAgrid < handle
         path
         A
         start
+        v_mat
     end
     properties (Access = private)
         succ
@@ -25,22 +26,27 @@ classdef LPAgrid < handle
     % define the class methods
     methods
         % constructor
-        function lpa = LPAgrid(A,s_start,s_goal,succ,pred,heur,cost)
-            if nargin == 7
+        function lpa = LPAgrid(A,start,goal,succ,pred,heur)
+            if nargin == 6
                 lpa.A = A;
                 lpa.succ = succ;
                 lpa.pred = pred;
-                lpa.cost = cost;
-                lpa.start = s_start;
-                lpa.goal = s_goal;
+                lpa.start = start;
+                lpa.goal = goal;
                 lpa.heur = heur;
+                
                 lpa.U = PQueue();
                 lpa.g = zeros(2,0);
                 lpa.rhs = [lpa.start; 0];
                 lpa.U.Insert(lpa.start,CalcKey(lpa.start,lpa));
+                
                 lpa.path = {};
                 lpa.path_plot = {};
                 [lpa.Nr,lpa.Nc] = size(lpa.A);
+                fprintf('[LPAgrid] Created class object\n');
+                
+            else
+                fprintf('[LPAgrid] Bad initialization\n');
             end
         end
         
@@ -53,11 +59,12 @@ classdef LPAgrid < handle
         function UpdateVertex(lpa,s)
     
             if s ~= lpa.start
-                Nbors = lpa.pred(s,lpa.A);
+                [Nbors,costs] = lpa.pred(s,lpa.A);
                 lim = inf;
                 for k = 1:length(Nbors);
-                    g_val = getVecVal(Nbors(k),lpa.g);
-                    val = g_val + lpa.cost(Nbors(k),s,lpa.A);
+                    g_val = getVecVal(Nbors{k},lpa.g);
+                    val = g_val + costs(k);
+%                     val = g_val + lpa.cost(Nbors(k),s,lpa.A);
                     if val < lim
                         lim = val;
                     end
@@ -66,6 +73,7 @@ classdef LPAgrid < handle
             end
 
             if lpa.U.Member(s)
+%                 fprintf('Removed vertex %d\n', s);
                 lpa.U.Remove(s);
             end
 
@@ -74,7 +82,33 @@ classdef LPAgrid < handle
             if g_val ~= rhs_val
                 key = CalcKey(s,lpa);
                 lpa.U.Insert(s,key);
+%                 fprintf('Inserted vertex %d\n', s);
             end
+
+        end
+        
+        % update grid with new information
+        function UpdateGrid(lpa)
+            vs = find(lpa.A == 2);
+            
+            if isempty(vs)
+                fprintf('[LPAgrid] No new information\n');
+                return;
+            end
+            
+            for k = 1:length(vs)
+                [r,c] = ind2sub(size(lpa.A),vs(k));
+                lpa.A(r,c) = 0; 
+                [Nbors,~] = lpa.succ(vs(k),lpa.A);
+                Nbors{end+1} = vs(k);
+                
+                for j = 1:length(Nbors)
+                    lpa.UpdateVertex(Nbors{k});
+                end
+  
+            end
+            
+            fprintf('[LPAgrid] Updated grid with new information\n');
 
         end
         
@@ -93,9 +127,37 @@ classdef LPAgrid < handle
             showPath({},fliplr(lpa.A'));
         end
         
+        % show g values on grid
+        function ShowValues(lpa)
+            showvals(lpa);
+        end
         
     end
     
+end
+
+function showvals(lpa)
+    lpa.v_mat = inf(lpa.Nc,lpa.Nr);
+
+    for i = 1:lpa.Nc*lpa.Nr
+        [r,c] = ind2sub(size(lpa.A),i);
+        g_val = getVecVal(i,lpa.g);
+        if g_val ~= inf
+            lpa.v_mat(lpa.Nc-c+1,r) = g_val;
+        else
+            lpa.v_mat(lpa.Nc-c+1,r) = NaN;
+        end
+    end
+
+    figure;
+    hold on;
+    title('[LPAgrid] Estimate of start distances');
+    h = bar3(flipud(lpa.v_mat));
+    for i = 1:length(h)
+         zdata = get(h(i),'Zdata');
+         set(h(i),'Cdata',zdata)
+    end
+    axis([0 lpa.Nr+1 0 lpa.Nc+1]);
 end
 
 function key = CalcKey(s,lpa)
@@ -103,10 +165,9 @@ function key = CalcKey(s,lpa)
     g_val = getVecVal(s,lpa.g);
     rhs_val = getVecVal(s,lpa.rhs);
 
-    [sr,sc] = ind2sub(size(lpa.A),s);
-    [gr,gc] = ind2sub(size(lpa.A),lpa.goal);
+    [r,c] = ind2sub(size(lpa.A),s);
 
-    key1 = min([g_val, rhs_val]) + lpa.heur([sr,sc],[gr,gc]);
+    key1 = min([g_val, rhs_val]) + lpa.heur([r,c]);
     key2 = min([g_val, rhs_val]);
 
     key = [key1, key2];
@@ -137,7 +198,7 @@ end
 function makepath(lpa)
     g_goal = getVecVal(lpa.goal,lpa.g);
     if g_goal == inf
-        fprintf('No such path can be created.\n');
+        fprintf('[LPAgrid] No such path can be created\n');
         lpa.path = {};
         lpa.path_plot = {};
         return;
@@ -147,20 +208,20 @@ function makepath(lpa)
 
     vertex = lpa.goal;
     while vertex ~= lpa.start
-        Nbors = lpa.succ(vertex,lpa.A);
+        [Nbors,costs] = lpa.succ(vertex,lpa.A);
 
         lim = inf;
         key = 0;
         for k = 1:length(Nbors)
-            g_val = getVecVal(Nbors(k),lpa.g);
-            val = g_val + lpa.cost(vertex,Nbors(k),lpa.A);
+            g_val = getVecVal(Nbors{k},lpa.g);
+            val = g_val + costs(k);
             if val < lim
                 lim = val;
                 key = k;
             end
         end
 
-        vertex = Nbors(key);
+        vertex = Nbors{key};
         lpa.path{end+1} = vertex;
     end
 
@@ -172,10 +233,10 @@ function makepath(lpa)
         lpa.path_plot{i} = [c,lpa.Nr-r+1];
     end
     
-    fprintf('Created optimal path.\n');
+    fprintf('[LPAgrid] Created optimal path of length %d\n',g_goal);
 end
 
-function lpa = findpath(lpa)
+function findpath(lpa)
     UTopKey = lpa.U.TopKey();
     goalKey = CalcKey(lpa.goal,lpa);
     keyflag = 0;
@@ -193,23 +254,28 @@ function lpa = findpath(lpa)
     cnt = 0;
     while keyflag || valflag
         
+%         disp(lpa.U);
         u = lpa.U.Pop();
         cnt = cnt + 1;
+%         fprintf('Extracted vertex %d\n',u);
+%         keyboard
+
         
         g_u = getVecVal(u,lpa.g);
         rhs_u = getVecVal(u,lpa.rhs);
         
         if g_u > rhs_u
             lpa.g = setVecVal(u,lpa.g,rhs_u);
-            Nbors = lpa.succ(u,lpa.A);
-            for k = Nbors
-                lpa.UpdateVertex(k);
+            [Nbors,~] = lpa.succ(u,lpa.A);
+            for k = 1:length(Nbors)
+                lpa.UpdateVertex(Nbors{k});
             end
         else
             lpa.g = setVecVal(u,lpa.g,inf);
-            Nbors = lpa.succ(u,lpa.A);
-            for k = [u Nbors]
-                lpa.UpdateVertex(k);
+            [Nbors,~] = lpa.succ(u,lpa.A);
+            Nbors{end+1} = u;
+            for k = 1:length(Nbors)
+                lpa.UpdateVertex(Nbors{k});
             end
         end
         
@@ -227,10 +293,14 @@ function lpa = findpath(lpa)
         if g_goalval ~= rhs_goalval
             valflag = 1;
         end
-        
+%         fprintf('\n');
     end
     
-    fprintf('Finished in %d set extractions\n',cnt);
+    fprintf('[LPAgrid] Finished in %d set extractions\n',cnt);
+    
+    if cnt ~= 0
+        lpa.CreatePath();
+    end
     
 end
 

@@ -1,4 +1,4 @@
-function [ d ] = diagh( s1,s2)
+function [ d ] = diagh( s1,s2 )
 
 dx = abs( s1(2) - s2(2) );
 dy = abs( s1(1) - s2(1) );

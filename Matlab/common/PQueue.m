@@ -110,10 +110,11 @@ end
 
 function [s,idx] = PopElement(pq)
     keys = pq.U(2:end,:);
-    keys = keys';
+    keys = flipud(keys');
+    N = size(keys,1);
 
     [~, idx] = sortrows(keys);
 
-    s = pq.U(1,idx(1));
-    idx = idx(1);
+    s = pq.U(1,N-idx(1)+1);
+    idx = N-idx(1)+1;
 end
