@@ -1,5 +1,6 @@
+import os
 import sys
-sys.path.append("C:\Users\Jay\Dropbox\Personal\Research\shortest-path\Python\common")
+sys.path.append(os.path.abspath(__file__ + "/../../" + "/common"))
 
 import dijkstra
 from maze_functions import *
@@ -18,8 +19,8 @@ heur4 = lambda x: maxh(x,goal,p,q)
 # show_values(d_obj.cost_so_far,A)
 # print "\n"
 
-neighbors = lambda x: maze4_neighbors(x,A,heur,p,q)
-d_obj = dijkstra.dijkstra(neighbors,start,goal,heur)
+neighbors = lambda x: maze4_neighbors(x,A,heur2,p,q)
+d_obj = dijkstra.dijkstra(neighbors,start,goal,heur2)
 dist,cnt,path = d_obj.solve()
 # show_path(d_obj.path,A)
 show_values(d_obj.cost_so_far,A)

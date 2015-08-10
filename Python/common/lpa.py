@@ -23,8 +23,8 @@ class LPAgrid:
         self.U.put(self.start, self.CalcKey(self.start)+(-next(self.counter),))
 
         self.path = []
-        (self.Nr,self.Nc) = A.shape
-        print "[LPA] Created class object"
+        self.Nr,self.Nc = A.shape
+        print "[LPA*] Created class object"
         
     def CalcKey(self,vertex):
         
@@ -112,14 +112,14 @@ class LPAgrid:
             # print "%d" % cnt
             # print "\n"
         
-        print "[LPA] Finished in %d queue extractions" % cnt
+        print "[LPA*] Finished in %d queue extractions" % cnt
         self.make_path()
         
-        return
+        return cnt
     
     def make_path(self):
         if self.g.get(self.goal,float("inf")) == float("inf"):
-            print "[LPA] No possible path"
+            print "[LPA*] No possible path"
             return
         
         self.path = []
@@ -130,7 +130,7 @@ class LPAgrid:
             Nbors,costs = self.succ(vertex,self.A)
             
             lim = float("inf")
-            key = 0
+            key = -1
             for idx in range(0,len(Nbors)):
                 val = self.g.get(Nbors[idx],float("inf")) + costs[idx]
                 if val < lim:
@@ -141,7 +141,7 @@ class LPAgrid:
             self.path.append(vertex)
             
         self.path.reverse()   
-        print("[LPA] Created path")
+        print "[LPA*] Created optimal path of length %d" % self.g.get(self.goal)
         
         return
     
@@ -150,7 +150,7 @@ class LPAgrid:
         row,col = (self.A == 2).nonzero()
         
         if row.size == 0:
-            print "[LPA] No information to update grid"
+            print "[LPA*] No new information to update grid"
             return
         
         self.A[row,col] = 0
@@ -168,6 +168,6 @@ class LPAgrid:
             for vertex in upd_list:
                 self.UpdateVertex(vertex)
         
-        print "[LPA] Updated grid with new information"
+        print "[LPA*] Updated grid with new information"
         
         return

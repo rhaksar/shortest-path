@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(__file__ + "/../../" + "/common"))
 import lpa
 from maze_functions import *
 
-(start,goal,A,p,q,r) = CreateMaze(2)
+(start,goal,A,p,q,r) = CreateMaze(4)
 
 heur = lambda x: 0
 heur2 = lambda x: manh(x,goal,p,q)

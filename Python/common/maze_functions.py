@@ -207,6 +207,28 @@ def maze8_ext_neighbors(x,A,h,pc,qc,rc):
     
     return Nbors,costs
 
+def maze4_all_observer( x,A ):
+    Nr,Nc = A.shape
+    r,c = x
+    
+    Nodes = []
+    t = 2
+    
+    if r+1 < Nr and A[(r+1,c)] >= t:
+        Nodes.append((r+1,c))
+    
+    if r-1 >= 0 and A[(r-1,c)] >= t:
+        Nodes.append((r-1,c))
+        
+    if c+1 < Nc and A[(r,c+1)] >= t:
+        Nodes.append((r,c+1))
+    
+    if c-1 >= 0 and A[(r,c-1)] >= t:
+        Nodes.append((r,c-1))
+        
+    return Nodes
+
+
 def CreateMaze(c):
     if c == 1:
         A = numpy.ones( (5,5) )
