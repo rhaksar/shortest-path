@@ -8,6 +8,8 @@ class PriorityQueue:
         return len(self.elements) == 0
     
     def put(self, item, priority):
+        # if self.isElement(item):
+        #     print "This item is already in the queue: %s" % (item,)
         heapq.heappush(self.elements, (priority, item))
     
     def get(self):

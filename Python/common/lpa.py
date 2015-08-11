@@ -70,6 +70,8 @@ class LPAgrid:
         if g_val != rhs_val:
             self.U.put(vertex, self.CalcKey(vertex)+(-next(self.counter),))
             # print "Inserted vertex %s" % (vertex,)
+        
+        return
     
     def ComputeShortestPath(self):
         

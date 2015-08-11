@@ -18,7 +18,6 @@ total = 0
 total_dist = 0
 dist,cnt,path = d_obj.solve()
 total += cnt
-total_dist += dist
 
 path_final = [start]
 r_start = path_final[0]
@@ -32,7 +31,6 @@ while r_start != goal:
         neighbors = lambda x: maze4_neighbors( x,A,heur2,p,q )
         d_obj = dijkstra.dijkstra( neighbors,r_start,goal,heur2 )
         dist,cnt,path = d_obj.solve()
-        total_dist += dist
         total += cnt
         
         idx = 1
@@ -41,7 +39,15 @@ while r_start != goal:
             print "There is no possible path" 
             break
         
+    
+    Nbors,costs = maze4_neighbors(d_obj.path[idx-1],A,heur,p,q)    
     r_start = d_obj.path[idx]
+    
+    for i,nbor in enumerate(Nbors):
+        if nbor == r_start:
+            total_dist += costs[i]
+            continue
+    
     path_final.append(r_start)
         
     idx += 1

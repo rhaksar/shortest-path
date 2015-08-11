@@ -295,6 +295,43 @@ def CreateMaze(c):
         q = 1
         r = 1
     
+    elif c == 7:
+        file_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '\EE266_maze4.mat'
+        mat = scipy.io.loadmat(file_path)
+        
+        A = mat['A']
+        
+        Nr,Nc = A.shape
+        for i in range(0,Nr):
+            for j in range(0,Nc):
+                if A[(i,j)] == 0:
+                    A[(i,j)] = 2
+        
+        start = (62,0)
+        goal = (20,80)
+        p = 2
+        q = 4
+        r = float("inf")
+        
+    elif c == 8:
+        file_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '\LPA_maze8_2.mat'
+        mat = scipy.io.loadmat(file_path)
+        
+        A = mat['A']
+        A[(7,12)] = 0
+        
+        Nr,Nc = A.shape
+        for i in range(0,Nr):
+            for j in range(0,Nc):
+                if A[(i,j)] == 0:
+                    A[(i,j)] = 2
+        
+        start = (7,3)
+        goal = (7,16)
+        p = 1
+        q = 1
+        r = 1
+    
     return start,goal,A,p,q,r
 
 def ind2sub( shape,idx ):
