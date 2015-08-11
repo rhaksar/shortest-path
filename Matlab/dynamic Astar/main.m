@@ -6,9 +6,9 @@ clear; clc; close all;
 [sr,sc] = ind2sub(size(A),start);
 [tr,tc] = ind2sub(size(A),goal);
 
-heur = @(x) 0;
-heur = @(x) manh( x,[tr,tc],p,q );
-neighbors = @(x) maze4_neighbors( x,A,heur,p,q );
+heur1 = @(x) 0;
+heur2 = @(x) manh( x,[tr,tc],p,q );
+neighbors = @(x) maze4_neighbors( x,A,heur2,p,q );
 
 % [start,goal,A,p,q] = CreateMaze(2); 
 % heur = @(x) 0;  
@@ -16,9 +16,9 @@ neighbors = @(x) maze4_neighbors( x,A,heur,p,q );
 
 total = 0;
 total_dist = 0;
-[dist,path,cnt,~] = dijkstra( neighbors,start,goal,heur,Nr,Nc );
+[dist,path,cnt,~] = dijkstra( neighbors,start,goal,heur2,Nr,Nc );
 total = total + cnt;
-total_dist = total_dist + dist;
+% total_dist = total_dist + dist;
 
 path_final = {start};
 r_start = path_final{1};
@@ -28,10 +28,10 @@ while r_start ~= goal
     
     if A(r,c) == 2;
         A(r,c) = 0;
-        neighbors = @(x) maze4_neighbors( x,A,heur,p,q ); %%%
+        neighbors = @(x) maze4_neighbors( x,A,heur2,p,q ); %%%
         
-        [dist,path,cnt,~] = dijkstra( neighbors,r_start,goal,heur,Nr,Nc );
-        total_dist = total_dist + dist;
+        [dist,path,cnt,~] = dijkstra( neighbors,r_start,goal,heur2,Nr,Nc );
+%         total_dist = total_dist + dist;
         total = total + cnt;
         idx = 2;
         
@@ -40,7 +40,17 @@ while r_start ~= goal
         end
     end
     
+    
+    [Nbors,costs] = maze4_neighbors( path{idx-1},A,heur1,p,q );
     r_start = path{idx};
+    
+    for i = 1:length(Nbors)
+        if Nbors{i} == r_start
+            total_dist = total_dist + costs(i);vv
+            continue
+        end
+    end
+    
     path_final{end+1} = r_start;
     
     idx = idx + 1;

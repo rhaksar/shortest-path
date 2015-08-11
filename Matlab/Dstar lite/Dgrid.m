@@ -53,8 +53,8 @@ classdef Dgrid < handle
         end
         
         % find the shortest path
-        function [cnt,dist] = ComputeShortestPath(dstar)
-            [cnt,dist] = findpath(dstar);
+        function cnt = ComputeShortestPath(dstar)
+            cnt = findpath(dstar);
         end
         
         % navigate the grid
@@ -167,6 +167,7 @@ function update(dstar,s)
 
     if dstar.U.Member(s)
         dstar.U.Remove(s);
+%         fprintf('Removed vertex %d\n',s);
     end
 
     g_val = getVecVal(s,dstar.g);
@@ -174,11 +175,12 @@ function update(dstar,s)
     if g_val ~= rhs_val
         key = CalcKey(s,dstar);
         dstar.U.Insert(s,key);
+%         fprintf('Inserted vertex %d\n',s);
     end
 
 end
 
-function [cnt,dist] = findpath(dstar)
+function [cnt] = findpath(dstar)
     UTopKey = dstar.U.TopKey();
     startKey = CalcKey(dstar.start,dstar);
     keyflag = 0;
@@ -196,6 +198,7 @@ function [cnt,dist] = findpath(dstar)
     cnt = 0;
     while keyflag || valflag
         
+        k_old = dstar.U.TopKey();
         u = dstar.U.Pop();
         cnt = cnt + 1;
         
@@ -205,11 +208,12 @@ function [cnt,dist] = findpath(dstar)
         g_u = getVecVal(u,dstar.g);
         rhs_u = getVecVal(u,dstar.rhs);
         
-        k_old = dstar.U.TopKey();
+%         k_old = dstar.U.TopKey();
         ukey = CalcKey(u,dstar);
         
         if k_old(1) < ukey(1) || (k_old(1) == ukey(1) && k_old(2) < ukey(2))
             dstar.U.Insert(u,CalcKey(u,dstar));
+%             fprintf('Inserted vertex %d\n',u);
         elseif g_u > rhs_u
             dstar.g = setVecVal(u,dstar.g,rhs_u);
             [Nbors,~] = dstar.pred(u, dstar.A);
@@ -239,7 +243,7 @@ function [cnt,dist] = findpath(dstar)
             valflag = 1;
         end
     end
-    dist = getVecVal(dstar.start,dstar.g);
+%     dist = getVecVal(dstar.start,dstar.g);
     fprintf('[Dgrid] Finished in %d set extractions\n',cnt);
 end
 
@@ -248,8 +252,8 @@ function movepath(dstar,dflag)
     
     total = 0;
     total_dist = 0;
-    [cnt,dist] = dstar.ComputeShortestPath();
-    total_dist = total_dist + dist;
+    cnt = dstar.ComputeShortestPath();
+%     total_dist = total_dist + dist;
     total = total + cnt;
     
     dstar.path = {dstar.start};
@@ -294,9 +298,9 @@ function movepath(dstar,dflag)
             for k = upd_vs
                 dstar.UpdateVertex(k);
             end
-            [cnt,dist] = dstar.ComputeShortestPath();
+            cnt = dstar.ComputeShortestPath();
             total = total + cnt;
-            total_dist = total_dist + dist;
+%             total_dist = total_dist + dist;
         end
 
         [Nbors,cost] = dstar.succ(dstar.start, dstar.A);
@@ -315,6 +319,7 @@ function movepath(dstar,dflag)
         end
         dstar.start = Nbors{key};
         dstar.path{end+1} = dstar.start;
+        total_dist = total_dist + cost(key);
         
         if dflag
             [x(1),x(2)] = ind2sub(size(dstar.A),dstar.start);
@@ -334,48 +339,48 @@ function movepath(dstar,dflag)
 end
 
 function showPath(path,A)
-initializeGraphics(A);
-global handles;
-for i=1:size(path,2)
-    changeColor(path{i},'r');
-    pause(0.03);    
-end
+    initializeGraphics(A);
+    global handles;
+        for i=1:size(path,2)
+            changeColor(path{i},'r');
+            pause(0.03);
+        end
 end
 
 function initializeGraphics(A)
-figure;
-N=size(A,1);
-M=size(A,2);
-global handles
-handles =cell(N,M);
-axis([-0.2,N+0.2,-0.2,M+0.2]);
-hold on
-daspect([1,1,1]);
-for i=1:N
-    for j=1:M
-        switch A(i,j)
-            case 0,
-                col = 'k';
-            case 1,
-                col = 'w';
-            case 2,
-                col = 'b';
-            case 3,
-                col = 'g';
-            case 4,
-                col = 'y';
+    figure;
+    N=size(A,1);
+    M=size(A,2);
+    global handles
+    handles =cell(N,M);
+    axis([-0.2,N+0.2,-0.2,M+0.2]);
+    hold on
+    daspect([1,1,1]);
+        for i=1:N
+            for j=1:M
+                switch A(i,j)
+                    case 0,
+                        col = 'k';
+                    case 1,
+                        col = 'w';
+                    case 2,
+                        col = 'b';
+                    case 3,
+                        col = 'g';
+                    case 4,
+                        col = 'y';
+                end
+                handles{i,j}=rectangle('Position',...
+                    [i-1,j-1,1,1],'LineWidth',1,'FaceColor',col);
+            end
         end
-        handles{i,j}=rectangle('Position',...
-                     [i-1,j-1,1,1],'LineWidth',1,'FaceColor',col);
-    end
-end
-set(gca,'XTick',[],'YTick',[]);
+    set(gca,'XTick',[],'YTick',[]);
 end
 
 function changeColor(x,col)
     global handles;
     delete(handles{x(1),x(2)});
     handles{x(1),x(2)}=rectangle('Position',...
-                     [x(1)-1,x(2)-1,1,1],'LineWidth',1,'FaceColor',col);
-                 drawnow;
+        [x(1)-1,x(2)-1,1,1],'LineWidth',1,'FaceColor',col);
+    drawnow;
 end

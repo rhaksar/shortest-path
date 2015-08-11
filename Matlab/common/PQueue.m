@@ -52,6 +52,9 @@ classdef PQueue<handle
         
         % insert element into queue
         function Insert(pq, s, k)
+            if ~isempty(pq.U) && pq.Member(s)
+                fprintf('This item already in the queue: %d\n',s);
+            end
            pq.U = [pq.U [s; k']];
         end
         

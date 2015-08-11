@@ -8,6 +8,7 @@ if maze_choice == 1
     r = inf;
     A(55,36) = 2;
 %     A(A == 0) = 1;
+%     A(A == 0) = 2;
     return;
     
 elseif maze_choice == 2
@@ -29,8 +30,12 @@ elseif maze_choice == 2
     
     A(A == 0) = 1;
     A(A == -1) = 0;
+    
+    A(A == 0) = 2;
 %     A(A == -1) = 1;
     
+    A(8,13) = 2;
+
 %     A(8,13) = 2;
     %     A(8,6) = 2;
 %     A(9,14) = 2;

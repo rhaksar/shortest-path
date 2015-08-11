@@ -12,7 +12,7 @@ pred = @(x,A) maze4_ext_neighbors(x,A,heur1,p,q);
 obs = @(x,A) maze4_observer(x,A);
 
 dstar_obj = Dgrid(A,start,goal,succ,pred,obs,heur2);
-dstar_obj.NavigateGrid(1);
+dstar_obj.NavigateGrid(0);
 
 
 %% D* Lite with Manhattan way-point distances
