@@ -18,4 +18,4 @@ pred = lambda x,A: maze4_ext_neighbors(x,A,heur,p,q)
 obs = lambda x,A: maze4_all_observer(x,A)
 
 dstar_obj = dstar.Dgrid(A,start,goal,succ,pred,obs,heur2)
-# dstar_obj.NavigateGrid()
+dstar_obj.NavigateGrid()

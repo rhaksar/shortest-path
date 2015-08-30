@@ -1,5 +1,5 @@
 import sys
-sys.path.append("C:\Users\Jay\Dropbox\Personal\Research\shortest-path\Python\common")
+sys.path.append(os.path.abspath(__file__ + "/../../" + "/common"))
 
 import dijkstra
 from maze_functions import *

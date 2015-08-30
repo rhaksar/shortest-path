@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy
 import os
+import scipy
 import scipy.io
 import sys
 
@@ -206,6 +207,73 @@ def maze8_ext_neighbors(x,A,h,pc,qc,rc):
         costs.reverse()
     
     return Nbors,costs
+
+def stock_ext_succ( x,A,ps ):
+    Nr,Nc = A.shape
+    r,c = x
+    
+    Nbors = []
+    costs = []
+    
+    if c+1 < Nc and A[(r,c+1)] and c != Nc-2:
+        Nbors.append( (r,c+1) )
+        if A[r,c]:
+            costs.append( 0 )
+        else:
+            costs.append(float("inf"))
+    
+    if r-1 >= 0 and c+1 < Nc and A[(r-1,c+1)] and c != Nc-2:
+        Nbors.append( (r-1,c+1) )
+        if A[r,c]:
+            costs.append( ps[c] )
+        else:
+            costs.append(float("inf"))
+            
+    if c == Nc-2:
+        Nbors.append((0,Nc-1))
+        costs.append(0)
+
+    return Nbors, costs
+
+def stock_ext_pred( x,A,ps) :
+    Nr,Nc = A.shape
+    r,c = x
+    
+    Nbors = []
+    costs = []
+    
+    if c-1 >= 0 and A[(r,c-1)] and c != Nc-1:
+        Nbors.append( (r,c-1) )
+        if A[r,c]:
+            costs.append( 0 )
+        else:
+            costs.append(float("inf"))
+    
+    if r+1 < Nr and c-1 >= 0 and A[(r+1,c-1)] and c != Nc-1:
+        Nbors.append( (r+1,c-1) )
+        if A[r,c]:
+            costs.append( ps[c-1] )
+        else:
+            costs.append(float("inf"))
+    
+    if r == 0 and c == Nc-1:
+        for i in range(0,Nr):
+            Nbors.append((i,c-1))
+            costs.append(0)
+    
+    return Nbors, costs
+
+def stock_observer( x,A,p ):
+    Nr,Nc = A.shape
+    r,c = x
+    
+    Nodes = []
+    tst = numpy.random.binomial(1,p)
+    
+    if r-1 >= 0 and c+1 < Nc and A[r-1,c+1] and c != Nc-2 and tst == 1:
+        Nodes.append( (r-1,c+1) )
+    
+    return Nodes
 
 def maze4_all_observer( x,A ):
     Nr,Nc = A.shape
@@ -428,3 +496,11 @@ def show_path(path,A):
     
     plt.show()
     return
+
+def lognpdf(x,mean,sig):
+    if x<0 or not scipy.isfinite(x):
+        pdf = 0
+    else:
+        a   = 1./(x*sig*scipy.sqrt(2*scipy.pi))
+        pdf =  a*scipy.exp(-(scipy.log(x)-mean)**2/(2.*sig**2)) 
+    return pdf
