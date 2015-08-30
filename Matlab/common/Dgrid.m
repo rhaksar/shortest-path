@@ -12,7 +12,6 @@ classdef Dgrid < handle
         v_mat
     end
     properties (Access = private)
-        last
         km
         succ
         pred
@@ -47,6 +46,7 @@ classdef Dgrid < handle
                 [dstar.Nr,dstar.Nc] = size(dstar.A);
                 
                 fprintf('[Dgrid] Created class object\n');
+                
             else
                 fprintf('[Dgrid] Bad initialization\n');
             end
@@ -58,8 +58,8 @@ classdef Dgrid < handle
         end
         
         % navigate the grid
-        function NavigateGrid(dstar,dflag)
-            movepath(dstar,dflag);
+        function [total_cnt,total_dist] = NavigateGrid(dstar,dflag)
+            [total_cnt,total_dist] = movepath(dstar,dflag);
         end
         
         % show the current path on the grid
@@ -93,7 +93,7 @@ function showvals(dstar)
     for i = 1:dstar.Nc*dstar.Nr
         [r,c] = ind2sub(size(dstar.A),i);
         g_val = getVecVal(i,dstar.g);
-        [gr,gc] = ind2sub(size(dstar.A),dstar.goal);
+%         [gr,gc] = ind2sub(size(dstar.A),dstar.goal);
         if g_val ~= inf
             dstar.v_mat(dstar.Nc-c+1,r) = g_val;% + dstar.heur([r,c],[gr,gc]);
         else
@@ -157,7 +157,6 @@ function update(dstar,s)
         for k = 1:length(Nbors)
             g_val = getVecVal(Nbors{k},dstar.g);
             val = g_val + cost(k);
-%             val = g_val + dstar.cost(s,Nbors(k),dstar.A);
             if val < lim
                 lim = val;
             end
@@ -207,8 +206,6 @@ function [cnt] = findpath(dstar)
         
         g_u = getVecVal(u,dstar.g);
         rhs_u = getVecVal(u,dstar.rhs);
-        
-%         k_old = dstar.U.TopKey();
         ukey = CalcKey(u,dstar);
         
         if k_old(1) < ukey(1) || (k_old(1) == ukey(1) && k_old(2) < ukey(2))
@@ -243,18 +240,20 @@ function [cnt] = findpath(dstar)
             valflag = 1;
         end
     end
-%     dist = getVecVal(dstar.start,dstar.g);
+    
     fprintf('[Dgrid] Finished in %d set extractions\n',cnt);
 end
 
-function movepath(dstar,dflag)
-    dstar.last = dstar.start;
+function [total_cnt,total_dist] = movepath(dstar,dflag)
+    s_last = dstar.start;
     
-    total = 0;
+    total_cnt = 0;
     total_dist = 0;
-    cnt = dstar.ComputeShortestPath();
-%     total_dist = total_dist + dist;
-    total = total + cnt;
+    
+    if isempty(dstar.g)
+        cnt = dstar.ComputeShortestPath();
+        total_cnt = total_cnt + cnt;
+    end
     
     dstar.path = {dstar.start};
     if dflag
@@ -274,11 +273,11 @@ function movepath(dstar,dflag)
         
         vs = dstar.obs(dstar.start,dstar.A);
         if ~isempty(vs)
-            [last_r,last_c] = ind2sub(size(dstar.A),dstar.last);
+            [last_r,last_c] = ind2sub(size(dstar.A),s_last);
             [start_r,start_c] = ind2sub(size(dstar.A),dstar.start);
             
             dstar.km = dstar.km + dstar.heur([last_r,last_c],[start_r,start_c]);
-            dstar.last = dstar.start;
+            s_last = dstar.start;
             
             for k = 1:length(vs)
                 [r,c] = ind2sub([dstar.Nr,dstar.Nc],vs(k));
@@ -299,8 +298,7 @@ function movepath(dstar,dflag)
                 dstar.UpdateVertex(k);
             end
             cnt = dstar.ComputeShortestPath();
-            total = total + cnt;
-%             total_dist = total_dist + dist;
+            total_cnt = total_cnt + cnt;
         end
 
         [Nbors,cost] = dstar.succ(dstar.start, dstar.A);
@@ -311,7 +309,6 @@ function movepath(dstar,dflag)
             
             g_val = getVecVal(Nbors{k},dstar.g);
             val = g_val + cost(k);
-%             val = g_val + dstar.cost(dstar.start,Nbors(k),dstar.A);
             if val < lim
                 lim = val;
                 key = k;
@@ -333,7 +330,7 @@ function movepath(dstar,dflag)
         [r,c] = ind2sub([dstar.Nr,dstar.Nc],dstar.path{k});
         dstar.path{k} = [r,c];
     end
-    fprintf('[Dgrid] Total set extractions: %d\n',total);
+    fprintf('[Dgrid] Total set extractions: %d\n',total_cnt);
     fprintf('[Dgrid] Total path length: %d\n',total_dist);    
 
 end

@@ -6,9 +6,9 @@ if maze_choice == 1
     start = sub2ind(size(A),s(1),s(2));
     goal = sub2ind(size(A),t(1),t(2));
     r = inf;
-    A(55,36) = 2;
+%     A(55,36) = 2;
 %     A(A == 0) = 1;
-%     A(A == 0) = 2;
+    A(A == 0) = 2;
     return;
     
 elseif maze_choice == 2
@@ -31,19 +31,20 @@ elseif maze_choice == 2
     A(A == 0) = 1;
     A(A == -1) = 0;
     
+%     A(A == 0) = 1;
     A(A == 0) = 2;
-%     A(A == -1) = 1;
     
     A(8,13) = 2;
+    A(9,14) = 2;
 
-%     A(8,13) = 2;
-    %     A(8,6) = 2;
-%     A(9,14) = 2;
-%     A(7,1) = 2;
-    %     A(9,19) = 2;
+%   A(8,13) = 2;
+%   A(8,6) = 2;
+%   A(9,14) = 2;
+%   A(7,1) = 2;
+%   A(9,19) = 2;
     p = 1;
     q = 1;
-    r = inf;
+    r = 1;
     
     A = fliplr(A');
     
@@ -104,6 +105,7 @@ elseif maze_choice == 5
          0, 1, 0, 1;
          0, 1, 0, 1;
          1, 1, 1, 1];
+     
      A = fliplr(A');
      start = 24;
      goal = 1;
@@ -126,6 +128,7 @@ elseif maze_choice == 6
      q = 1;
      r = inf;
      return;
+     
 elseif maze_choice == 7
     A = ones(20,20);
     start = sub2ind(size(A),6,10);
@@ -134,6 +137,7 @@ elseif maze_choice == 7
     q = 1;
     r = inf;
     return;
+    
 elseif maze_choice == 8
     A = ones(5,5);
     start = 21;
@@ -143,7 +147,6 @@ elseif maze_choice == 8
     r = inf;
     return;
 
-    
 else
     fprintf('Bad maze choice\n');
     A = [];
@@ -153,6 +156,7 @@ else
     q = inf;
     r = inf;
     return;
+    
 end
 
 

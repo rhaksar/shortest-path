@@ -1,27 +1,27 @@
 %% A* with/without heuristics
 clear; clc; close all;
 
-[start,goal,A,p,q,r] = CreateMaze(1); 
+[start,goal,A,p,q,r] = CreateMaze(2); 
 [sr,sc] = ind2sub(size(A),start);
 [gr,gc] = ind2sub(size(A),goal);
 [Nr,Nc] = size(A);
 
 heur = @(x) 0;  
-% heur = @(x) diagh(x,[gr,gc]);
-% heur = @(x) maxh(x,[gr,gc]);
-% heur = @(x) manh(x,[gr,gc],p,q);
+heur2 = @(x) manh(x,[gr,gc],p,q);
+heur3 = @(x) diagh(x,[gr,gc]);
+heur4 = @(x) maxh(x,[gr,gc]);
 
-neighbors = @(x) maze4_neighbors( x,A,heur,p,q );
-% neighbors = @(x) maze8_neighbors( x,A,heur,p,q,r );
+% neighbors = @(x) maze4_neighbors( x,A,heur2,p,q );
+neighbors = @(x) maze8_neighbors( x,A,heur3,p,q,r );
 
-[dist,path,cnt,v] = dijkstra( neighbors,start,goal,heur,Nr,Nc );
+[dist,path,cnt,v] = dijkstra( neighbors,start,goal,heur3,Nr,Nc );
     
 fprintf('Total set extractions: %d\n',cnt);
 fprintf('Total path length: %d\n',dist);
 
 for k = 1:length(path)
-    [r,c] = ind2sub(size(A),path{k});
-    path{k} = [r,c];
+    [rr,cc] = ind2sub(size(A),path{k});
+    path{k} = [rr,cc];
 end
 
 % showValues(v,A);

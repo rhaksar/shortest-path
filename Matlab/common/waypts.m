@@ -26,6 +26,16 @@ Ynew = sort([Y c]);
 ind_x = find(Xnew == r);
 ind_y = find(Ynew == c);
 
+% disp(ind_x);
+% disp(ind_y);
+
+if length(ind_x) > 1
+    ind_x = ind_x(1);
+end
+if length(ind_y) > 1
+    ind_y = ind_y(1);
+end
+
 if ind_x > length(X)
     x_ulim = inf;
     x_llim = Xnew(ind_x-1);

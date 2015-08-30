@@ -35,8 +35,5 @@ if r-1 >= 1 && c+1 <= Nc && A(r-1,c+1) >= thresh
     Nbors = [Nbors sub2ind([Nr,Nc],r-1,c+1)];
 end
 
-
-
-
 end
 
